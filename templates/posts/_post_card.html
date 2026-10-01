@@ -1,0 +1,67 @@
+<article class="overflow-hidden rounded-3xl border border-slate-200/80 bg-white shadow-[0_12px_40px_-24px_rgba(15,23,42,0.35)]" data-post-id="{{ post.pk }}">
+    <header class="flex items-center justify-between p-4 sm:px-5">
+        <a href="{% url 'accounts:profile' post.author.username %}" class="group flex items-center gap-3">
+            {% if post.author.profile.avatar %}
+                <img src="{{ post.author.profile.avatar.url }}" alt="Avatar de {{ post.author.username }}" class="h-11 w-11 rounded-full object-cover ring-2 ring-white outline outline-1 outline-slate-200 transition group-hover:outline-fuchsia-300">
+            {% else %}
+                <span class="grid h-11 w-11 place-content-center rounded-full bg-gradient-to-br from-fuchsia-500 to-orange-400 font-bold text-white">{{ post.author.username|first|upper }}</span>
+            {% endif %}
+            <span>
+                <strong class="block text-sm group-hover:text-fuchsia-600">{{ post.author.username }}</strong>
+                <small class="text-slate-500">Hace {{ post.created_at|timesince }}</small>
+            </span>
+        </a>
+        <div class="flex items-center gap-1 text-sm">
+            <a class="rounded-lg px-2.5 py-2 font-medium text-slate-500 transition hover:bg-slate-100 hover:text-slate-900" href="{% url 'posts:detail' post.pk %}">Ver post</a>
+            {% if user == post.author %}
+                <a class="rounded-lg px-2.5 py-2 font-medium text-slate-500 transition hover:bg-fuchsia-50 hover:text-fuchsia-700" href="{% url 'posts:edit' post.pk %}">Editar</a>
+            {% endif %}
+            {% if user == post.author or user.can_manage_users %}
+                <a class="rounded-lg px-2.5 py-2 font-medium text-slate-500 transition hover:bg-red-50 hover:text-red-600" href="{% url 'posts:delete' post.pk %}">Eliminar</a>
+            {% endif %}
+        </div>
+    </header>
+
+    {% if is_detail %}
+        <img src="{{ post.image.url }}" alt="Publicacion de {{ post.author.username }}" class="max-h-[760px] w-full bg-slate-100 object-contain">
+    {% else %}
+        <a href="{% url 'posts:detail' post.pk %}" class="block bg-slate-100">
+            <img src="{{ post.image.url }}" alt="Publicacion de {{ post.author.username }}" class="max-h-[700px] w-full object-contain transition duration-500 hover:scale-[1.005]">
+        </a>
+    {% endif %}
+
+    <div class="p-4 sm:px-5 sm:pb-5">
+        <div class="flex items-center gap-1">
+            <form method="post" action="{% url 'posts:like' post.pk %}" data-like-form>
+                {% csrf_token %}<input type="hidden" name="next" value="{{ request.path }}">
+                <button aria-label="Me gusta" aria-pressed="{% if post.id in liked_post_ids %}true{% else %}false{% endif %}" class="group grid h-10 w-10 place-content-center rounded-full transition hover:bg-fuchsia-50" data-like-button>
+                    <svg viewBox="0 0 24 24" class="h-7 w-7 stroke-current stroke-2 transition group-active:scale-75 {% if post.id in liked_post_ids %}fill-fuchsia-600 text-fuchsia-600{% else %}fill-none text-slate-700{% endif %}" data-like-icon aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 0 0 0-7.78Z"/></svg>
+                </button>
+            </form>
+            <a href="{% url 'posts:detail' post.pk %}#comentarios" class="grid h-10 w-10 place-content-center rounded-full text-slate-700 transition hover:bg-slate-100" aria-label="Ver comentarios">
+                <svg viewBox="0 0 24 24" class="h-7 w-7 fill-none stroke-current stroke-2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4Z"/></svg>
+            </a>
+        </div>
+        <p class="mt-1 text-sm font-bold"><span data-like-count>{{ post.like_count }}</span> Me gusta</p>
+        {% if post.caption %}
+            <p class="mt-2 text-sm leading-6"><a class="font-bold hover:text-fuchsia-600" href="{% url 'accounts:profile' post.author.username %}">{{ post.author.username }}</a> <span class="text-slate-700">{{ post.caption|linebreaksbr }}</span></p>
+        {% endif %}
+
+        <div class="mt-4 space-y-2.5" {% if is_detail %}id="comentarios"{% endif %} data-comments-list>
+            {% for comment in post.comments.all %}
+                {% include "posts/_comment.html" %}
+            {% empty %}
+                <p class="text-xs text-slate-400" data-empty-comments>Se el primero en comentar.</p>
+            {% endfor %}
+        </div>
+
+        <form method="post" action="{% url 'posts:comment' post.pk %}" class="mt-4 border-t border-slate-100 pt-3" data-comment-form>
+            {% csrf_token %}
+            <div class="flex items-center gap-2">
+                {{ comment_form.body }}
+                <button class="rounded-lg px-3 py-2 text-sm font-bold text-fuchsia-600 transition hover:bg-fuchsia-50 disabled:cursor-not-allowed disabled:opacity-50" data-submit-button>Publicar</button>
+            </div>
+            <p class="mt-1 hidden text-xs text-red-600" data-form-error></p>
+        </form>
+    </div>
+</article>

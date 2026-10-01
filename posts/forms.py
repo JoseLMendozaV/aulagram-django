@@ -17,7 +17,16 @@ class PostForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields["image"].widget.attrs["class"] = INPUT_CLASS
+        self.fields["image"].widget.attrs.update(
+            {
+                "class": "sr-only",
+                "accept": "image/jpeg,image/png,image/webp,image/gif",
+                "data-image-input": "",
+            }
+        )
+        self.fields["caption"].widget.attrs.update(
+            {"data-caption-input": "", "placeholder": "Escribe una descripcion..."}
+        )
 
     def clean_image(self):
         image = self.cleaned_data.get("image")

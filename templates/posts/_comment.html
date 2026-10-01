@@ -1,0 +1,12 @@
+<div class="group flex items-start justify-between gap-3 text-sm" data-comment-id="{{ comment.pk }}">
+    <p class="min-w-0 leading-5">
+        <a href="{% url 'accounts:profile' comment.user.username %}" class="font-bold hover:text-fuchsia-600">{{ comment.user.username }}</a>
+        <span class="break-words text-slate-700">{{ comment.body }}</span>
+    </p>
+    {% if user == comment.user or user == post.author or user.can_manage_users %}
+        <form method="post" action="{% url 'posts:comment_delete' comment.pk %}" data-comment-delete-form>
+            {% csrf_token %}
+            <button class="rounded-md px-1.5 py-0.5 text-xs text-slate-400 opacity-70 transition hover:bg-red-50 hover:text-red-600 group-hover:opacity-100" aria-label="Eliminar comentario">Eliminar</button>
+        </form>
+    {% endif %}
+</div>

@@ -1,3 +1,4 @@
+{% load static %}
 <!doctype html>
 <html lang="es">
 <head>
@@ -12,20 +13,20 @@
         }
     </script>
 </head>
-<body class="min-h-screen bg-slate-50 text-slate-900">
-    <nav class="sticky top-0 z-20 border-b border-slate-200 bg-white/95 backdrop-blur">
+<body class="min-h-screen bg-[radial-gradient(circle_at_top,_#fdf4ff_0,_#f8fafc_32rem)] text-slate-900 antialiased">
+    <nav class="sticky top-0 z-40 border-b border-slate-200/80 bg-white/90 shadow-[0_1px_20px_-12px_rgba(15,23,42,0.25)] backdrop-blur-xl">
         <div class="mx-auto flex max-w-5xl items-center justify-between px-4 py-3">
             <a href="{% url 'posts:home' %}" class="text-2xl font-black tracking-tight">
                 Aula<span class="text-fuchsia-600">Gram</span>
             </a>
             {% if user.is_authenticated %}
-                <div class="flex items-center gap-2 sm:gap-4">
-                    <a href="{% url 'posts:feed' %}" class="rounded-lg px-3 py-2 text-sm font-semibold hover:bg-slate-100">Inicio</a>
-                    <a href="{% url 'posts:create' %}" class="rounded-lg bg-fuchsia-600 px-3 py-2 text-sm font-semibold text-white hover:bg-fuchsia-700">Publicar</a>
+                <div class="flex items-center gap-1 sm:gap-3">
+                    <a href="{% url 'posts:feed' %}" class="rounded-xl px-3 py-2 text-sm font-semibold transition hover:bg-slate-100">Inicio</a>
+                    <a href="{% url 'posts:create' %}" class="rounded-xl bg-slate-950 px-3.5 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-fuchsia-600">Publicar</a>
                     {% if user.can_manage_users %}
                         <a href="{% url 'accounts:user_list' %}" class="hidden rounded-lg px-3 py-2 text-sm font-semibold hover:bg-slate-100 sm:block">Usuarios</a>
                     {% endif %}
-                    <a href="{% url 'accounts:profile' user.username %}" class="text-sm font-bold">@{{ user.username }}</a>
+                    <a href="{% url 'accounts:profile' user.username %}" class="hidden text-sm font-bold transition hover:text-fuchsia-600 sm:block">@{{ user.username }}</a>
                     <form method="post" action="{% url 'accounts:logout' %}">
                         {% csrf_token %}
                         <button class="text-sm text-slate-500 hover:text-slate-900">Salir</button>
@@ -48,5 +49,8 @@
     <main class="mx-auto max-w-5xl px-4 py-8">
         {% block content %}{% endblock %}
     </main>
+    <div class="pointer-events-none fixed bottom-5 right-5 z-50 flex w-[min(22rem,calc(100vw-2rem))] flex-col gap-2" aria-live="polite" data-toast-container></div>
+    <script src="{% static 'js/app.js' %}" defer></script>
+    {% block extra_js %}{% endblock %}
 </body>
 </html>

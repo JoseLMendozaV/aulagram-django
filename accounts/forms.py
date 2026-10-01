@@ -58,6 +58,7 @@ class ProfileForm(StyledFormMixin, forms.ModelForm):
         model = Profile
         fields = ("avatar", "bio", "location", "website", "skills")
         widgets = {
+            "avatar": forms.FileInput(),
             "bio": forms.Textarea(attrs={"rows": 3}),
             "skills": forms.CheckboxSelectMultiple(),
         }
@@ -65,6 +66,19 @@ class ProfileForm(StyledFormMixin, forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.apply_styles()
+        self.fields["avatar"].widget.attrs.update(
+            {
+                "class": "sr-only",
+                "accept": "image/jpeg,image/png,image/webp,image/gif",
+                "data-avatar-input": "",
+            }
+        )
+        self.fields["bio"].widget.attrs.update(
+            {"data-bio-input": "", "placeholder": "Cuenta algo sobre ti..."}
+        )
+        self.fields["skills"].widget.attrs.update(
+            {"class": "h-4 w-4 rounded border-slate-300 text-fuchsia-600 focus:ring-fuchsia-500"}
+        )
 
 
 class RoleUpdateForm(forms.ModelForm):

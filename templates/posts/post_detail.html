@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}Publicacion de @{{ post.author.username }} | AulaGram{% endblock %}
+{% block content %}
+<div class="mx-auto max-w-2xl">
+    <a href="{% url 'posts:feed' %}" class="mb-5 inline-flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-bold text-slate-600 transition hover:bg-white hover:text-slate-950 hover:shadow-sm">
+        <span aria-hidden="true">←</span> Volver al feed
+    </a>
+    {% include "posts/_post_card.html" with is_detail=True %}
+</div>
+{% endblock %}

@@ -50,10 +50,42 @@ class PostFlowTests(TestCase):
         self.client.post(url)
         self.assertFalse(Like.objects.filter(user=self.other, post=self.post).exists())
 
+    def test_ajax_like_returns_json_without_redirect(self):
+        self.client.force_login(self.other)
+        response = self.client.post(
+            reverse("posts:like", args=[self.post.pk]),
+            HTTP_X_REQUESTED_WITH="XMLHttpRequest",
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertJSONEqual(response.content, {"liked": True, "count": 1})
+
     def test_user_can_comment(self):
         self.client.force_login(self.other)
         self.client.post(reverse("posts:comment", args=[self.post.pk]), {"body": "Genial"})
         self.assertTrue(Comment.objects.filter(post=self.post, body="Genial").exists())
+
+    def test_ajax_comment_returns_rendered_comment(self):
+        self.client.force_login(self.other)
+        response = self.client.post(
+            reverse("posts:comment", args=[self.post.pk]),
+            {"body": "Comentario sin recarga"},
+            HTTP_X_REQUESTED_WITH="XMLHttpRequest",
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("Comentario sin recarga", response.json()["html"])
+
+    def test_post_detail_is_available(self):
+        self.client.force_login(self.other)
+        response = self.client.get(reverse("posts:detail", args=[self.post.pk]))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, self.post.image.url)
+
+    def test_profile_post_thumbnail_links_to_detail(self):
+        self.client.force_login(self.other)
+        response = self.client.get(
+            reverse("accounts:profile", args=[self.author.username])
+        )
+        self.assertContains(response, reverse("posts:detail", args=[self.post.pk]))
 
     def test_non_author_cannot_edit(self):
         self.client.force_login(self.other)

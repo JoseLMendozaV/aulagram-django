@@ -1,19 +1,74 @@
 {% extends "base.html" %}
 {% block title %}Editar perfil | AulaGram{% endblock %}
 {% block content %}
-<div class="mx-auto max-w-2xl rounded-3xl bg-white p-8 shadow-lg">
-    <p class="text-sm font-bold uppercase tracking-widest text-fuchsia-600">CR-10 · Perfil</p>
-    <h1 class="mt-2 text-3xl font-black">Edita tu perfil</h1>
-    <form method="post" enctype="multipart/form-data" class="mt-7 space-y-5">
+<div class="mx-auto max-w-4xl">
+    <a href="{% url 'accounts:profile' user.username %}" class="inline-flex items-center gap-2 text-sm font-bold text-slate-500 transition hover:text-slate-950">← Volver al perfil</a>
+    <div class="mb-7 mt-4">
+        <p class="text-sm font-bold uppercase tracking-[0.18em] text-fuchsia-600">CR-10 · Perfil</p>
+        <h1 class="mt-1 text-3xl font-black tracking-tight sm:text-4xl">Tu identidad en AulaGram</h1>
+        <p class="mt-2 max-w-2xl text-slate-500">Actualiza la informacion que veran tus compañeros en publicaciones y comentarios.</p>
+    </div>
+
+    <form method="post" enctype="multipart/form-data" class="grid gap-6 lg:grid-cols-[18rem_1fr]" data-profile-editor>
         {% csrf_token %}
-        {% for field in user_form %}<div><label class="text-sm font-semibold" for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}{% for error in field.errors %}<p class="mt-1 text-sm text-red-600">{{ error }}</p>{% endfor %}</div>{% endfor %}
-        {% for field in profile_form %}
-            <fieldset><label class="text-sm font-semibold" for="{{ field.id_for_label }}">{{ field.label }}</label>
-                {% if field.name == 'skills' %}<div class="mt-2 grid grid-cols-2 gap-2 rounded-xl border border-slate-200 p-4 sm:grid-cols-3">{{ field }}</div>{% else %}{{ field }}{% endif %}
-                {% for error in field.errors %}<p class="mt-1 text-sm text-red-600">{{ error }}</p>{% endfor %}
+        <aside class="h-fit rounded-3xl border border-slate-200 bg-white p-6 text-center shadow-[0_15px_40px_-28px_rgba(15,23,42,0.35)] lg:sticky lg:top-24">
+            <div class="relative mx-auto h-40 w-40 overflow-hidden rounded-full bg-gradient-to-br from-fuchsia-100 to-orange-100 ring-4 ring-white shadow-xl outline outline-1 outline-slate-200">
+                {% if user.profile.avatar %}
+                    <img src="{{ user.profile.avatar.url }}" alt="Tu avatar" class="h-full w-full object-cover" data-avatar-preview>
+                    <span class="hidden h-full w-full place-content-center text-5xl font-black text-fuchsia-700" data-avatar-fallback>{{ user.username|first|upper }}</span>
+                {% else %}
+                    <img alt="Previsualizacion de avatar" class="hidden h-full w-full object-cover" data-avatar-preview>
+                    <span class="grid h-full w-full place-content-center text-5xl font-black text-fuchsia-700" data-avatar-fallback>{{ user.username|first|upper }}</span>
+                {% endif %}
+            </div>
+            {{ profile_form.avatar }}
+            <label for="{{ profile_form.avatar.id_for_label }}" class="mt-5 inline-flex cursor-pointer rounded-xl border border-slate-300 px-4 py-2.5 text-sm font-bold transition hover:border-fuchsia-300 hover:bg-fuchsia-50 hover:text-fuchsia-700">Cambiar fotografia</label>
+            {% for error in profile_form.avatar.errors %}<p class="mt-2 text-sm text-red-600">{{ error }}</p>{% endfor %}
+            <p class="mt-3 text-xs leading-5 text-slate-400">Usa una imagen cuadrada, clara y menor de 5 MB.</p>
+        </aside>
+
+        <section class="rounded-3xl border border-slate-200 bg-white p-6 shadow-[0_15px_40px_-28px_rgba(15,23,42,0.35)] sm:p-8">
+            <div class="grid gap-5 sm:grid-cols-2">
+                {% for field in user_form %}
+                    <div {% if field.name == 'email' %}class="sm:col-span-2"{% endif %}>
+                        <label class="text-sm font-bold" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                        {{ field }}
+                        {% for error in field.errors %}<p class="mt-1 text-sm text-red-600">{{ error }}</p>{% endfor %}
+                    </div>
+                {% endfor %}
+            </div>
+
+            <div class="my-7 border-t border-slate-100"></div>
+            <div>
+                <div class="flex items-center justify-between">
+                    <label class="text-sm font-bold" for="{{ profile_form.bio.id_for_label }}">{{ profile_form.bio.label }}</label>
+                    <span class="text-xs tabular-nums text-slate-400"><span data-bio-count>0</span>/160</span>
+                </div>
+                {{ profile_form.bio }}
+                {% for error in profile_form.bio.errors %}<p class="mt-1 text-sm text-red-600">{{ error }}</p>{% endfor %}
+            </div>
+
+            <div class="mt-5 grid gap-5 sm:grid-cols-2">
+                <div><label class="text-sm font-bold" for="{{ profile_form.location.id_for_label }}">{{ profile_form.location.label }}</label>{{ profile_form.location }}{% for error in profile_form.location.errors %}<p class="mt-1 text-sm text-red-600">{{ error }}</p>{% endfor %}</div>
+                <div><label class="text-sm font-bold" for="{{ profile_form.website.id_for_label }}">{{ profile_form.website.label }}</label>{{ profile_form.website }}{% for error in profile_form.website.errors %}<p class="mt-1 text-sm text-red-600">{{ error }}</p>{% endfor %}</div>
+            </div>
+
+            <fieldset class="mt-7">
+                <legend class="text-sm font-bold">{{ profile_form.skills.label }}</legend>
+                <p class="mt-1 text-xs text-slate-500">Selecciona las tecnologias e intereses que quieres mostrar.</p>
+                <div class="mt-3 grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
+                    {% for checkbox in profile_form.skills %}
+                        <label class="flex cursor-pointer items-center gap-2.5 rounded-xl border border-slate-200 px-3 py-2.5 text-sm font-medium transition hover:border-fuchsia-300 hover:bg-fuchsia-50">{{ checkbox.tag }}<span>{{ checkbox.choice_label }}</span></label>
+                    {% empty %}<p class="text-sm text-slate-400">El administrador aun no agrego habilidades.</p>{% endfor %}
+                </div>
+                {% for error in profile_form.skills.errors %}<p class="mt-1 text-sm text-red-600">{{ error }}</p>{% endfor %}
             </fieldset>
-        {% endfor %}
-        <button class="rounded-xl bg-fuchsia-600 px-5 py-3 font-bold text-white">Guardar cambios</button>
+
+            <div class="mt-8 flex items-center justify-end gap-3 border-t border-slate-100 pt-6">
+                <a href="{% url 'accounts:profile' user.username %}" class="rounded-xl px-4 py-2.5 text-sm font-bold text-slate-500 transition hover:bg-slate-100">Cancelar</a>
+                <button class="rounded-xl bg-slate-950 px-5 py-3 text-sm font-bold text-white shadow-lg shadow-slate-950/10 transition hover:bg-fuchsia-600 disabled:opacity-60" data-profile-submit>Guardar perfil</button>
+            </div>
+        </section>
     </form>
 </div>
 {% endblock %}

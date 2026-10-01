@@ -2,11 +2,28 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.db.models import Count, Prefetch
+from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.template.loader import render_to_string
 from django.views.decorators.http import require_POST
 
 from .forms import CommentForm, PostForm
 from .models import Comment, Like, Post
+
+
+def post_queryset():
+    """Consulta comun para evitar N+1 en el feed y el detalle."""
+    return (
+        Post.objects.select_related("author__profile")
+        .prefetch_related(
+            Prefetch("comments", queryset=Comment.objects.select_related("user"))
+        )
+        .annotate(like_count=Count("likes", distinct=True))
+    )
+
+
+def wants_json(request):
+    return request.headers.get("x-requested-with") == "XMLHttpRequest"
 
 
 def home(request):
@@ -15,13 +32,7 @@ def home(request):
 
 @login_required
 def feed(request):
-    posts = (
-        Post.objects.select_related("author__profile")
-        .prefetch_related(
-            Prefetch("comments", queryset=Comment.objects.select_related("user"))
-        )
-        .annotate(like_count=Count("likes", distinct=True))
-    )
+    posts = post_queryset()
     liked_post_ids = set(
         Like.objects.filter(user=request.user, post__in=posts).values_list(
             "post_id", flat=True
@@ -35,6 +46,17 @@ def feed(request):
 
 
 @login_required
+def post_detail(request, pk):
+    post = get_object_or_404(post_queryset(), pk=pk)
+    liked_post_ids = {post.pk} if post.likes.filter(user=request.user).exists() else set()
+    return render(
+        request,
+        "posts/post_detail.html",
+        {"post": post, "liked_post_ids": liked_post_ids, "comment_form": CommentForm()},
+    )
+
+
+@login_required
 def post_create(request):
     form = PostForm(request.POST or None, request.FILES or None)
     if request.method == "POST" and form.is_valid():
@@ -42,7 +64,7 @@ def post_create(request):
         post.author = request.user
         post.save()
         messages.success(request, "Publicacion creada.")
-        return redirect("posts:feed")
+        return redirect("posts:detail", pk=post.pk)
     return render(request, "posts/post_form.html", {"form": form, "title": "Nueva publicacion"})
 
 
@@ -63,7 +85,7 @@ def post_edit(request, pk):
     if request.method == "POST" and form.is_valid():
         form.save()
         messages.success(request, "Publicacion actualizada.")
-        return redirect("posts:feed")
+        return redirect("posts:detail", pk=post.pk)
     return render(request, "posts/post_form.html", {"form": form, "title": "Editar publicacion"})
 
 
@@ -86,6 +108,8 @@ def toggle_like(request, pk):
     like, created = Like.objects.get_or_create(user=request.user, post=post)
     if not created:
         like.delete()
+    if wants_json(request):
+        return JsonResponse({"liked": created, "count": post.likes.count()})
     return redirect(request.POST.get("next") or "posts:feed")
 
 
@@ -99,7 +123,17 @@ def comment_create(request, pk):
         comment.user = request.user
         comment.post = post
         comment.save()
+        if wants_json(request):
+            html = render_to_string(
+                "posts/_comment.html",
+                {"comment": comment, "post": post},
+                request=request,
+            )
+            return JsonResponse({"html": html, "comment_id": comment.pk})
     else:
+        if wants_json(request):
+            error = form.errors.get("body", ["No se pudo publicar el comentario."])[0]
+            return JsonResponse({"error": str(error)}, status=422)
         messages.error(request, "El comentario esta vacio o es demasiado largo.")
     return redirect("posts:feed")
 
@@ -115,5 +149,7 @@ def comment_delete(request, pk):
     ):
         raise PermissionDenied("No tienes permiso para eliminar este comentario.")
     comment.delete()
+    if wants_json(request):
+        return JsonResponse({"deleted": True})
     messages.success(request, "Comentario eliminado.")
     return redirect("posts:feed")

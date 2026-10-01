@@ -28,7 +28,12 @@
     </div>
     <h2 class="mb-4 mt-10 text-xl font-black">Publicaciones</h2>
     <div class="grid grid-cols-2 gap-2 sm:grid-cols-3">
-        {% for post in posts %}<div class="aspect-square overflow-hidden rounded-lg bg-slate-100"><img src="{{ post.image.url }}" alt="Publicacion {{ post.pk }}" class="h-full w-full object-cover transition hover:scale-105"></div>{% empty %}<p class="col-span-full py-10 text-center text-slate-500">Este usuario aun no ha publicado.</p>{% endfor %}
+        {% for post in posts %}
+            <a href="{% url 'posts:detail' post.pk %}" class="group relative aspect-square overflow-hidden rounded-xl bg-slate-100 shadow-sm" aria-label="Ver publicacion {{ post.pk }}">
+                <img src="{{ post.image.url }}" alt="Publicacion {{ post.pk }}" class="h-full w-full object-cover transition duration-500 group-hover:scale-105">
+                <span class="absolute inset-0 grid place-content-center bg-slate-950/0 text-sm font-bold text-white opacity-0 transition group-hover:bg-slate-950/35 group-hover:opacity-100">Ver publicacion</span>
+            </a>
+        {% empty %}<p class="col-span-full py-10 text-center text-slate-500">Este usuario aun no ha publicado.</p>{% endfor %}
     </div>
 </section>
 {% endblock %}
