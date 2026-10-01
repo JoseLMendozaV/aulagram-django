@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Editar perfil | AulaGram{% endblock %}
+{% block content %}
+<div class="mx-auto max-w-2xl rounded-3xl bg-white p-8 shadow-lg">
+    <p class="text-sm font-bold uppercase tracking-widest text-fuchsia-600">CR-10 · Perfil</p>
+    <h1 class="mt-2 text-3xl font-black">Edita tu perfil</h1>
+    <form method="post" enctype="multipart/form-data" class="mt-7 space-y-5">
+        {% csrf_token %}
+        {% for field in user_form %}<div><label class="text-sm font-semibold" for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}{% for error in field.errors %}<p class="mt-1 text-sm text-red-600">{{ error }}</p>{% endfor %}</div>{% endfor %}
+        {% for field in profile_form %}
+            <fieldset><label class="text-sm font-semibold" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {% if field.name == 'skills' %}<div class="mt-2 grid grid-cols-2 gap-2 rounded-xl border border-slate-200 p-4 sm:grid-cols-3">{{ field }}</div>{% else %}{{ field }}{% endif %}
+                {% for error in field.errors %}<p class="mt-1 text-sm text-red-600">{{ error }}</p>{% endfor %}
+            </fieldset>
+        {% endfor %}
+        <button class="rounded-xl bg-fuchsia-600 px-5 py-3 font-bold text-white">Guardar cambios</button>
+    </form>
+</div>
+{% endblock %}

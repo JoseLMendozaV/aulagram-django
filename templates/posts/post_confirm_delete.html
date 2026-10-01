@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}Eliminar publicacion | AulaGram{% endblock %}
+{% block content %}
+<div class="mx-auto max-w-md rounded-3xl bg-white p-8 text-center shadow-lg">
+    <div class="mx-auto grid h-16 w-16 place-content-center rounded-full bg-red-100 text-3xl">!</div>
+    <h1 class="mt-5 text-2xl font-black">¿Eliminar publicacion?</h1>
+    <p class="mt-2 text-slate-500">Tambien se eliminaran sus likes y comentarios. Esta accion no se puede deshacer.</p>
+    <form method="post" class="mt-7 flex justify-center gap-3">{% csrf_token %}<button class="rounded-xl bg-red-600 px-5 py-3 font-bold text-white">Si, eliminar</button><a href="{% url 'posts:feed' %}" class="rounded-xl bg-slate-100 px-5 py-3 font-bold">Cancelar</a></form>
+</div>
+{% endblock %}

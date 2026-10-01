@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Crear cuenta | AulaGram{% endblock %}
+{% block content %}
+<div class="mx-auto max-w-xl rounded-3xl bg-white p-8 shadow-xl sm:p-10">
+    <p class="text-sm font-bold uppercase tracking-widest text-fuchsia-600">Fase 1 · Autenticacion</p>
+    <h1 class="mt-2 text-3xl font-black">Crea tu cuenta</h1>
+    <form method="post" class="mt-7 space-y-4">
+        {% csrf_token %}
+        {% for field in form %}
+            <div>
+                <label for="{{ field.id_for_label }}" class="text-sm font-semibold">{{ field.label }}</label>
+                {{ field }}
+                {% if field.help_text %}<div class="mt-1 text-xs text-slate-500">{{ field.help_text|safe }}</div>{% endif %}
+                {% for error in field.errors %}<p class="mt-1 text-sm text-red-600">{{ error }}</p>{% endfor %}
+            </div>
+        {% endfor %}
+        <button class="w-full rounded-xl bg-fuchsia-600 px-4 py-3 font-bold text-white hover:bg-fuchsia-700">Crear cuenta</button>
+    </form>
+    <p class="mt-6 text-center text-sm text-slate-500">¿Ya tienes cuenta? <a class="font-bold text-fuchsia-600" href="{% url 'accounts:login' %}">Inicia sesion</a></p>
+</div>
+{% endblock %}

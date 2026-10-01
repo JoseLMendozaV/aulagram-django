@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}Gestion de usuarios | AulaGram{% endblock %}
+{% block content %}
+<div class="mb-7"><p class="text-sm font-bold uppercase tracking-widest text-fuchsia-600">CR-01 · Administracion</p><h1 class="mt-2 text-3xl font-black">Usuarios y roles</h1><p class="mt-2 text-slate-500">Esta pantalla solo es accesible para administradores; el servidor vuelve a validar cada cambio.</p></div>
+<div class="overflow-x-auto rounded-2xl border border-slate-200 bg-white shadow-sm">
+    <table class="w-full text-left text-sm">
+        <thead class="bg-slate-50 text-xs uppercase text-slate-500"><tr><th class="px-5 py-4">Usuario</th><th class="px-5 py-4">Correo</th><th class="px-5 py-4">Rol</th><th class="px-5 py-4">Accion</th></tr></thead>
+        <tbody class="divide-y divide-slate-100">
+            {% for account in users %}<tr>
+                <td class="px-5 py-4"><a class="font-bold hover:text-fuchsia-600" href="{% url 'accounts:profile' account.username %}">@{{ account.username }}</a>{% if account.is_superuser %}<span class="ml-2 rounded bg-slate-900 px-2 py-0.5 text-xs text-white">superusuario</span>{% endif %}</td>
+                <td class="px-5 py-4 text-slate-500">{{ account.email }}</td>
+                <td class="px-5 py-4">{{ account.get_role_display }}</td>
+                <td class="px-5 py-4">
+                    {% if not account.is_superuser %}<form method="post" action="{% url 'accounts:role_update' account.pk %}" class="flex min-w-64 gap-2">{% csrf_token %}<select name="role" class="rounded-lg border border-slate-300 px-2 py-1"><option value="MEMBER" {% if account.role == 'MEMBER' %}selected{% endif %}>Usuario</option><option value="CREATOR" {% if account.role == 'CREATOR' %}selected{% endif %}>Creador</option><option value="ADMIN" {% if account.role == 'ADMIN' %}selected{% endif %}>Administrador</option></select><button class="rounded-lg bg-slate-900 px-3 py-1 font-semibold text-white">Actualizar</button></form>{% else %}<span class="text-slate-400">Protegido</span>{% endif %}
+                </td>
+            </tr>{% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

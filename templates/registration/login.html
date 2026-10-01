@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Iniciar sesion | AulaGram{% endblock %}
+{% block content %}
+<div class="mx-auto grid max-w-4xl overflow-hidden rounded-3xl bg-white shadow-xl md:grid-cols-2">
+    <section class="hidden bg-gradient-to-br from-fuchsia-600 via-purple-600 to-orange-400 p-10 text-white md:flex md:flex-col md:justify-end">
+        <p class="text-4xl font-black">Comparte.<br>Aprende.<br>Construye.</p>
+        <p class="mt-4 text-white/80">Un proyecto educativo para descubrir Django construyendo una red social real.</p>
+    </section>
+    <section class="p-8 sm:p-12">
+        <h1 class="text-3xl font-black">Bienvenido</h1>
+        <p class="mt-2 text-sm text-slate-500">Inicia sesion para entrar a tu feed.</p>
+        <form method="post" class="mt-8 space-y-5">
+            {% csrf_token %}
+            {% if form.non_field_errors %}<div class="rounded-lg bg-red-50 p-3 text-sm text-red-700">{{ form.non_field_errors }}</div>{% endif %}
+            <div>
+                <label for="{{ form.username.id_for_label }}" class="text-sm font-semibold">Usuario</label>
+                <input type="text" name="username" autofocus required id="{{ form.username.id_for_label }}" class="mt-1 w-full rounded-xl border border-slate-300 px-3 py-2 outline-none focus:border-fuchsia-500 focus:ring-2 focus:ring-fuchsia-100">
+            </div>
+            <div>
+                <label for="{{ form.password.id_for_label }}" class="text-sm font-semibold">Contrasena</label>
+                <input type="password" name="password" required id="{{ form.password.id_for_label }}" class="mt-1 w-full rounded-xl border border-slate-300 px-3 py-2 outline-none focus:border-fuchsia-500 focus:ring-2 focus:ring-fuchsia-100">
+            </div>
+            {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
+            <button class="w-full rounded-xl bg-fuchsia-600 px-4 py-3 font-bold text-white hover:bg-fuchsia-700">Entrar</button>
+        </form>
+        <p class="mt-6 text-center text-sm text-slate-500">¿No tienes cuenta? <a class="font-bold text-fuchsia-600" href="{% url 'accounts:register' %}">Registrate</a></p>
+    </section>
+</div>
+{% endblock %}

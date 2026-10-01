@@ -1,0 +1,10 @@
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.env
+db.sqlite3
+media/*
+!media/.gitkeep
+.coverage
+htmlcov/

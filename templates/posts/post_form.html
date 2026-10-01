@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}{{ title }} | AulaGram{% endblock %}
+{% block content %}
+<div class="mx-auto max-w-xl rounded-3xl bg-white p-8 shadow-lg">
+    <h1 class="text-3xl font-black">{{ title }}</h1>
+    <p class="mt-2 text-sm text-slate-500">Las imagenes se guardan en <code>media/posts/</code>.</p>
+    <form method="post" enctype="multipart/form-data" class="mt-7 space-y-5">
+        {% csrf_token %}
+        {% for field in form %}<div><label class="text-sm font-semibold" for="{{ field.id_for_label }}">{{ field.label }}</label>{{ field }}{% for error in field.errors %}<p class="mt-1 text-sm text-red-600">{{ error }}</p>{% endfor %}</div>{% endfor %}
+        <div class="flex gap-3"><button class="rounded-xl bg-fuchsia-600 px-5 py-3 font-bold text-white">Guardar</button><a href="{% url 'posts:feed' %}" class="rounded-xl px-5 py-3 font-semibold text-slate-500">Cancelar</a></div>
+    </form>
+</div>
+{% endblock %}
