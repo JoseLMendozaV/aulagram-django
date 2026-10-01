@@ -3,8 +3,5 @@ __pycache__/
 .venv/
 venv/
 .env
-db.sqlite3
-media/*
-!media/.gitkeep
 .coverage
 htmlcov/

@@ -79,4 +79,7 @@ python manage.py test
 python manage.py check
 ```
 
-SQLite (`db.sqlite3`) y las imagenes subidas se excluyen de Git para mantener limpio el repositorio.
+El repositorio educativo incluye `db.sqlite3` y las imagenes de demostracion de
+`media/` para que, al clonarlo, el feed funcione de inmediato. Esta decision es
+solo apropiada para datos ficticios de clase: en un proyecto real, la base de
+datos, sesiones y archivos privados no deben versionarse.
